@@ -1,0 +1,5 @@
+android_demo/.buildozer/
+android_demo/bin/
+p4a_recipes/usdl2
+__pycache__/
+*.pyc
