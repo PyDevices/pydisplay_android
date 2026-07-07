@@ -54,8 +54,10 @@ cd ~/github/cmods
 `buildozer.spec` requirements:
 
 ```
-python3==3.13,sdl2,usdl2,displaysys,eventsys,graphics,multimer,lvglcpython
+python3,sdl2,usdl2,displaysys,eventsys,graphics,multimer,lvglcpython
 ```
+
+(`python3` unpinned — p4a currently pairs target and host Python at 3.14.2; do not pin `python3==3.13` or versions diverge.)
 
 On Android, **multimer** selects the **`_sdl2`** backend when `usdl2` is available.
 

@@ -1,3 +1,4 @@
+.cmods_build/
 android_demo/.buildozer/
 android_demo/bin/
 android_demo/display_driver.py

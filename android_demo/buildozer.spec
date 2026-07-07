@@ -6,7 +6,7 @@ source.dir = .
 source.include_exts = py
 source.main = main_lvgl.py
 version = 0.4.0
-requirements = python3==3.13,sdl2,usdl2,displaysys,eventsys,graphics,multimer,lvglcpython
+requirements = python3,sdl2,usdl2,displaysys,eventsys,graphics,multimer,lvglcpython
 orientation = landscape
 fullscreen = 0
 android.api = 31
