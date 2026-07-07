@@ -15,7 +15,10 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEMO="$ROOT/android_demo"
-CMODS_BUILD="$ROOT/.cmods_build/android_demo/bin"
+CMODS_BUILD_DIRS=(
+  "$ROOT/cmods_build/android_demo/bin"
+  "$ROOT/.cmods_build/android_demo/bin"
+)
 
 PACKAGE_ID="${PACKAGE_ID:-org.pydevices.pydisplaydemo}"
 ACTIVITY="${ACTIVITY:-org.kivy.android.PythonActivity}"
@@ -165,7 +168,7 @@ find_apk() {
 
   local -a candidates=()
   local dir apk
-  for dir in "$DEMO/bin" "$CMODS_BUILD"; do
+  for dir in "$DEMO/bin" "${CMODS_BUILD_DIRS[@]}"; do
     [[ -d "$dir" ]] || continue
     shopt -s nullglob
     for apk in "$dir"/*.apk; do
