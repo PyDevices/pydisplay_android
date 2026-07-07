@@ -47,6 +47,7 @@ cd ~/github/cmods
 | `android_demo/board_config.py` | SDL display + event broker (landscape, fullscreen on Android) |
 | `scripts/fetch_pydisplay_addons.sh` | Downloads `display_driver.py` + `lv_utils.py` from GitHub |
 | `scripts/emulator.sh` | Install APK on emulator and launch the demo |
+| `scripts/phone.sh` | Install APK on USB phone, launch, and tail debug logcat |
 | `android_demo/main_lvgl.py` | LVGL touch grid demo — default APK entry |
 | `android_demo/main.py` | Touch-paint demo without LVGL |
 | `android_demo/main_usdl2_raw.py` | Raw `usdl2` reference demo (no pydisplay stack) |
@@ -80,6 +81,13 @@ With a debug APK already built and an emulator running:
 ```
 
 On WSL, start the AVD from Android Studio on Windows first; the script uses `adb.exe` when available.
+
+With a USB phone (Developer options → USB debugging):
+
+```bash
+./scripts/phone.sh
+# install + launch + logcat; use --no-logs to skip log tail
+```
 
 ## Your own app
 
