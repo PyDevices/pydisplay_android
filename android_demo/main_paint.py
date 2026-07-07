@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 """
-pydisplay Android demo — SDLDisplay + eventsys + multimer.
+pydisplay touch-paint demo — SDLDisplay + eventsys + multimer.
 
-p4a SDL2 bootstrap runs this file as the app entry point.
+Desktop / optional demo; the APK entry is main.py (delegates to main_lvgl.py).
 """
 
 import multimer

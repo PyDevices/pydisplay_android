@@ -18,6 +18,7 @@ if [[ ! -x "$BUILDOZER" ]]; then
 fi
 
 "$ROOT/scripts/fetch_pydisplay_addons.sh" "$DEMO"
+"$ROOT/scripts/install_apk_main.sh" "$DEMO"
 
 export BUILDOZER_ANDROID_HOME="${BUILDOZER_ANDROID_HOME:-$HOME/.buildozer/android}"
 export ANDROID_HOME="${ANDROID_HOME:-$BUILDOZER_ANDROID_HOME/platform/android-sdk}"

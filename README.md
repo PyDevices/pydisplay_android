@@ -49,7 +49,8 @@ cd ~/github/cmods
 | `scripts/emulator.sh` | Install APK on emulator and launch the demo |
 | `scripts/phone.sh` | Install APK on USB phone, launch, and tail debug logcat |
 | `android_demo/main_lvgl.py` | LVGL touch grid demo — default APK entry |
-| `android_demo/main.py` | Touch-paint demo without LVGL |
+| `android_demo/main.py` | p4a entry (generated; delegates to `main_lvgl.py`) |
+| `android_demo/main_paint.py` | Touch-paint demo without LVGL |
 | `android_demo/main_usdl2_raw.py` | Raw `usdl2` reference demo (no pydisplay stack) |
 
 `buildozer.spec` requirements:

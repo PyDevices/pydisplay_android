@@ -24,8 +24,8 @@ fi
 
 cd "$DEMO"
 
-echo "== pydisplay touch-paint (main.py) =="
-xvfb-run -a "$PYTHON" main.py &
+echo "== pydisplay touch-paint (main_paint.py) =="
+xvfb-run -a "$PYTHON" main_paint.py &
 PID=$!
 sleep 2
 kill "$PID" 2>/dev/null || true
