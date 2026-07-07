@@ -4,43 +4,38 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEMO="$ROOT/android_demo"
-USDL2_DIR="${USDL2_DIR:-$ROOT/../usdl2}"
-PYDISPLAY="${PYDISPLAY_DIR:-$ROOT/../pydisplay}"
-LVCPY="${LVCPY_DIR:-$ROOT/../lv_cpython_mod}"
+VENV_DIR="${VENV_DIR:-$ROOT/.venv}"
+TESTPYPI="https://test.pypi.org/simple/"
+PYPI="https://pypi.org/simple/"
 
-if [[ ! -d "$PYDISPLAY/src/lib/displaysys" ]]; then
-  echo "Clone pydisplay beside pydisplay_android (or set PYDISPLAY_DIR):"
-  echo "  git clone https://github.com/PyDevices/pydisplay.git $PYDISPLAY"
-  exit 1
+PYTHON="$VENV_DIR/bin/python3"
+PIP="$VENV_DIR/bin/pip"
+
+if [[ ! -x "$PYTHON" ]]; then
+  python3 -m venv "$VENV_DIR"
+  "$PIP" install -q -U pip
 fi
 
-if [[ ! -f "$USDL2_DIR/setup.py" ]]; then
-  echo "Clone usdl2 beside pydisplay_android (or set USDL2_DIR):"
-  echo "  git clone https://github.com/PyDevices/usdl2.git $USDL2_DIR"
-  exit 1
-fi
+"$PIP" install -q \
+  -i "$TESTPYPI" --extra-index-url "$PYPI" \
+  usdl2 displaysys eventsys graphics multimer lvgl-cpython
 
-pip install -q -e "$USDL2_DIR"
-export PYTHONPATH="$PYDISPLAY/src/lib:$PYDISPLAY/src/add_ons:${PYTHONPATH:-}"
+"$ROOT/scripts/fetch_pydisplay_addons.sh" "$DEMO"
+
 cd "$DEMO"
 
 echo "== pydisplay touch-paint (main.py) =="
-xvfb-run -a python3 main.py &
+xvfb-run -a "$PYTHON" main.py &
 PID=$!
 sleep 2
 kill "$PID" 2>/dev/null || true
 wait "$PID" 2>/dev/null || true
 
-if [[ -d "$LVCPY/generated" ]]; then
-  echo "== LVGL + display_driver (main_lvgl.py) =="
-  pip install -q -e "$LVCPY"
-  xvfb-run -a python3 main_lvgl.py &
-  PID=$!
-  sleep 2
-  kill "$PID" 2>/dev/null || true
-  wait "$PID" 2>/dev/null || true
-else
-  echo "Skip LVGL smoke (clone lv_cpython_mod beside pydisplay_android or set LVCPY_DIR)"
-fi
+echo "== LVGL + display_driver (main_lvgl.py) =="
+xvfb-run -a "$PYTHON" main_lvgl.py &
+PID=$!
+sleep 2
+kill "$PID" 2>/dev/null || true
+wait "$PID" 2>/dev/null || true
 
 echo "Desktop demos exited cleanly (or were stopped after smoke window)"

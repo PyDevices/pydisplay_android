@@ -1,5 +1,7 @@
 android_demo/.buildozer/
 android_demo/bin/
-p4a_recipes/usdl2
+android_demo/display_driver.py
+android_demo/lv_utils.py
+.venv/
 __pycache__/
 *.pyc

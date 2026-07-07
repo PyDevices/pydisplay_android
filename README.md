@@ -2,75 +2,95 @@
 
 Android APK integration for [pydisplay](https://github.com/PyDevices/pydisplay): **python-for-android** recipes, a **buildozer** demo, and desktop smoke tests.
 
-On Android there is no MicroPython port; pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap**. The `import usdl2` API comes from the ctypes FFI package in [usdl2 `python/usdl2/`](https://github.com/PyDevices/usdl2/tree/main/python/usdl2). pydisplay's existing `SDLDisplay` backend works unchanged once `usdl2` is installed.
+On Android there is no MicroPython port; pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap**. Runtime packages are installed from **[TestPyPI](https://test.pypi.org/)** — not from local git checkouts.
 
-## Workspace layout
+## TestPyPI packages
 
-Clone these repos as siblings (e.g. under a `cmods` workspace):
+| PyPI name | Import | Role |
+|-----------|--------|------|
+| [usdl2](https://test.pypi.org/project/usdl2/) | `usdl2` | CPython ctypes SDL2 FFI |
+| [displaysys](https://test.pypi.org/project/displaysys/) | `displaysys` | Display drivers (`SDLDisplay`, …) |
+| [eventsys](https://test.pypi.org/project/eventsys/) | `eventsys` | Event broker / input queue |
+| [graphics](https://test.pypi.org/project/graphics/) | `graphics` | Drawing helpers |
+| [multimer](https://test.pypi.org/project/multimer/) | `multimer` | Timers (`_sdl2` backend on Android) |
+| [lvgl-cpython](https://test.pypi.org/project/lvgl-cpython/) | `lvgl` | LVGL native extension (Android wheels: `android_21_arm64_v8a`, …) |
 
-```bash
-git clone https://github.com/PyDevices/usdl2.git
-git clone https://github.com/PyDevices/pydisplay.git
-git clone https://github.com/PyDevices/lv_cpython_mod.git
-git clone https://github.com/PyDevices/pydisplay_android.git
-```
-
-| Repo | Role |
-|------|------|
-| [usdl2](https://github.com/PyDevices/usdl2) | CPython ctypes `usdl2` + `p4a_recipes/usdl2/` |
-| [pydisplay](https://github.com/PyDevices/pydisplay) | `SDLDisplay`, `eventsys`, `multimer`, `display_driver.py` |
-| [lv_cpython_mod](https://github.com/PyDevices/lv_cpython_mod) | `lvgl-cpython` wheels / source (optional for LVGL demo) |
-| **pydisplay_android** (this repo) | Demo APK, `pydisplay` + `lvglcpython` p4a recipes |
+`display_driver.py` and `lv_utils.py` are fetched from [pydisplay on GitHub](https://github.com/PyDevices/pydisplay) at build time (not vendored; not yet on TestPyPI). Override with `PYDISPLAY_GITHUB_REPO` / `PYDISPLAY_GITHUB_REF`.
 
 ## Build demo APK
 
-Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/latest/quickstart.html), `pip install buildozer`, sibling `usdl2` clone.
+Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/latest/quickstart.html), Ubuntu/WSL build tools (`git`, `zip`, `openjdk-17-jdk`, `autoconf`, …).
+
+From this repo:
 
 ```bash
 cd pydisplay_android/android_demo
 ./build_apk.sh
-# APK: android_demo/bin/pydisplaydemo-0.3.0-*-debug.apk (name may vary)
+# APK: android_demo/bin/pydisplaydemo-0.4.0-*-debug.apk (name may vary)
 adb install -r bin/*.apk
 ```
 
-`build_apk.sh` symlinks `usdl2`'s p4a recipe into `p4a_recipes/usdl2/`. If `../pydisplay` exists, it sets `P4A_pydisplay_DIR` for an in-tree pydisplay build. Set `P4A_lvgl_cpython_DIR` to a sibling `lv_cpython_mod` clone for in-tree LVGL source builds (`git submodule update --init lvgl` required).
+`build_apk.sh` creates `.venv/` in the repo root and installs `buildozer`. p4a pulls the PyDevices packages from TestPyPI via `p4a.extra_args` in `buildozer.spec`.
+
+From a **cmods** workspace (also freezes modules from root `manifest.py`):
+
+```bash
+cd ~/github/cmods
+./build_android.sh
+```
 
 ## pydisplay + LVGL on Android
 
-The demo APK uses **pydisplay** (`SDLDisplay`, `eventsys`, `multimer`) and **lvgl-cpython** via p4a recipes:
-
 | File | Role |
 |------|------|
-| `p4a_recipes/pydisplay/` | Installs `displaysys`, `eventsys`, `graphics`, `multimer`; copies `display_driver.py` + `lv_utils.py` to site-packages |
-| `p4a_recipes/lvglcpython/` | `PyProjectRecipe` for `lvgl-cpython` — TestPyPI prebuilt wheel (`android_21_arm64_v8a`, …) or source fallback |
+| `p4a_recipes/*/` | Thin `PyProjectRecipe` wrappers — install TestPyPI wheels |
 | `android_demo/board_config.py` | SDL display + event broker (landscape, fullscreen on Android) |
-| `android_demo/main_lvgl.py` | LVGL touch grid demo (`import display_driver`) — default APK entry |
+| `scripts/fetch_pydisplay_addons.sh` | Downloads `display_driver.py` + `lv_utils.py` from GitHub |
+| `scripts/emulator.sh` | Install APK on emulator and launch the demo |
+| `android_demo/main_lvgl.py` | LVGL touch grid demo — default APK entry |
 | `android_demo/main.py` | Touch-paint demo without LVGL |
-| `android_demo/main_usdl2_raw.py` | Raw `usdl2` reference demo (no pydisplay) |
+| `android_demo/main_usdl2_raw.py` | Raw `usdl2` reference demo (no pydisplay stack) |
 
-`buildozer.spec` requirements: `python3,sdl2,usdl2,pydisplay,lvglcpython` with `p4a.extra_index_url` for TestPyPI wheels.
+`buildozer.spec` requirements:
 
-On Android, **multimer** selects the **`_sdl2`** backend (SDL timers on the UI thread) when `usdl2` is available — not `_threading`.
+```
+python3==3.13,sdl2,usdl2,displaysys,eventsys,graphics,multimer,lvglcpython
+```
+
+On Android, **multimer** selects the **`_sdl2`** backend when `usdl2` is available.
 
 ## Desktop smoke test (Xvfb)
 
-Requires sibling `usdl2` and `pydisplay` clones:
+Installs runtime packages from TestPyPI into `.venv/`:
 
 ```bash
 cd pydisplay_android/android_demo
 ./test_desktop.sh
 ```
 
-For LVGL smoke, also clone `lv_cpython_mod` beside this repo (or set `LVCPY_DIR`).
+## Run on an emulator
+
+With a debug APK already built and an emulator running:
+
+```bash
+./scripts/emulator.sh
+# optional: ./scripts/emulator.sh path/to/your.apk
+```
+
+On WSL, start the AVD from Android Studio on Windows first; the script uses `adb.exe` when available.
 
 ## Your own app
 
-Copy `android_demo/board_config.py`, add `pydisplay` + `usdl2` to `buildozer.spec`, point `p4a.local_recipes` at this repo's `p4a_recipes/` (run `build_apk.sh` once to link the `usdl2` recipe), and write your main loop with `display_drv` / `broker` as usual.
+Copy `android_demo/board_config.py`. Run `scripts/fetch_pydisplay_addons.sh` (or let `build_apk.sh` do it) for LVGL glue. Add the TestPyPI packages to `buildozer.spec` `requirements`, set `p4a.extra_args` for TestPyPI, and point `p4a.local_recipes` at this repo's `p4a_recipes/`.
 
 ## Layout
 
 | Path | Role |
 |------|------|
-| `android_demo/` | buildozer project + touch-paint and LVGL demos |
-| `p4a_recipes/pydisplay/` | python-for-android recipe (depends on `usdl2`) |
-| `p4a_recipes/lvglcpython/` | python-for-android recipe for `lvgl-cpython` |
+| `android_demo/` | buildozer project + demos |
+| `p4a_recipes/usdl2/` | TestPyPI `usdl2` recipe |
+| `p4a_recipes/displaysys/` | TestPyPI `displaysys` recipe |
+| `p4a_recipes/eventsys/` | TestPyPI `eventsys` recipe |
+| `p4a_recipes/graphics/` | TestPyPI `graphics` recipe |
+| `p4a_recipes/multimer/` | TestPyPI `multimer` recipe |
+| `p4a_recipes/lvglcpython/` | TestPyPI `lvgl-cpython` recipe |
