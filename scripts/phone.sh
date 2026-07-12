@@ -16,10 +16,6 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEMO="$ROOT/android_demo"
-CMODS_BUILD_DIRS=(
-  "$ROOT/cmods_build/android_demo/bin"
-  "$ROOT/.cmods_build/android_demo/bin"
-)
 
 PACKAGE_ID="${PACKAGE_ID:-org.pydevices.pydisplaydemo}"
 ACTIVITY="${ACTIVITY:-org.kivy.android.PythonActivity}"
@@ -86,7 +82,7 @@ If the phone shows "unauthorized", unlock it and accept the RSA fingerprint prom
 If adb.exe sees the phone on Windows but WSL adb does not, use adb.exe (this script tries that on WSL).
 
 Build the APK first if needed:
-  cd ~/github/cmods && ./build_android.sh
+  cd ~/gh/pydevices/pydisplay_android && ./build_android.sh
 EOF
 }
 
@@ -108,7 +104,7 @@ No USB Android phone is connected to adb (or the device is unauthorized).
        ./scripts/phone.sh
 
 Build the APK first if needed:
-  cd android_demo && ./build_apk.sh
+  cd ~/gh/pydevices/pydisplay_android && ./build_android.sh
 EOF
 }
 
@@ -168,7 +164,7 @@ find_apk() {
 
   local -a candidates=()
   local dir apk
-  for dir in "$DEMO/bin" "${CMODS_BUILD_DIRS[@]}"; do
+  for dir in "$DEMO/bin"; do
     [[ -d "$dir" ]] || continue
     shopt -s nullglob
     for apk in "$dir"/*.apk; do
@@ -179,8 +175,7 @@ find_apk() {
 
   if [[ ${#candidates[@]} -eq 0 ]]; then
     echo "No APK found. Build one first:" >&2
-    echo "  cd $DEMO && ./build_apk.sh" >&2
-    echo "Or from cmods: ./build_android.sh" >&2
+    echo "  cd $ROOT && ./build_android.sh" >&2
     return 1
   fi
 

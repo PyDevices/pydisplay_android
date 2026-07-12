@@ -15,10 +15,6 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEMO="$ROOT/android_demo"
-CMODS_BUILD_DIRS=(
-  "$ROOT/cmods_build/android_demo/bin"
-  "$ROOT/.cmods_build/android_demo/bin"
-)
 
 PACKAGE_ID="${PACKAGE_ID:-org.pydevices.pydisplaydemo}"
 ACTIVITY="${ACTIVITY:-org.kivy.android.PythonActivity}"
@@ -82,7 +78,7 @@ Or set ADB explicitly:
   ADB='/mnt/c/Users/YOUR_USER/AppData/Local/Android/Sdk/platform-tools/adb.exe' ./scripts/emulator.sh
 
 Build the APK first if you have not already:
-  cd android_demo && ./build_apk.sh
+  ./build_android.sh
 EOF
 }
 
@@ -119,7 +115,7 @@ Set up an AVD on Linux/macOS like this:
        ./scripts/emulator.sh
 
 Build the APK first if you have not already:
-  cd android_demo && ./build_apk.sh
+  ./build_android.sh
 EOF
 }
 
@@ -168,7 +164,7 @@ find_apk() {
 
   local -a candidates=()
   local dir apk
-  for dir in "$DEMO/bin" "${CMODS_BUILD_DIRS[@]}"; do
+  for dir in "$DEMO/bin"; do
     [[ -d "$dir" ]] || continue
     shopt -s nullglob
     for apk in "$dir"/*.apk; do
@@ -179,8 +175,7 @@ find_apk() {
 
   if [[ ${#candidates[@]} -eq 0 ]]; then
     echo "No APK found. Build one first:" >&2
-    echo "  cd $DEMO && ./build_apk.sh" >&2
-    echo "Or from cmods: ./build_android.sh" >&2
+    echo "  cd $ROOT && ./build_android.sh" >&2
     return 1
   fi
 

@@ -24,20 +24,13 @@ Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/
 From this repo:
 
 ```bash
-cd pydisplay_android/android_demo
-./build_apk.sh
-# APK: android_demo/bin/pydisplaydemo-0.4.0-*-debug.apk (name may vary)
-adb install -r bin/*.apk
-```
-
-`build_apk.sh` creates `.venv/` in the repo root and installs `buildozer`. p4a pulls the PyDevices packages from TestPyPI via `p4a.extra_args` in `buildozer.spec`.
-
-From a **cmods** workspace (also freezes modules from root `manifest.py`):
-
-```bash
-cd ~/github/cmods
+cd ~/gh/pydevices/pydisplay_android
 ./build_android.sh
+# APK: android_demo/bin/pydisplaydemo-0.4.0-*-debug.apk (name may vary)
+adb install -r android_demo/bin/*.apk
 ```
+
+`build_android.sh` creates `.venv/` in the repo root and installs host deps from `requirements.txt` (`buildozer`, Cython, …). `android_demo/build_apk.sh` is a thin wrapper that calls the same script. p4a pulls the PyDevices packages from TestPyPI via `p4a.extra_args` in `buildozer.spec`.
 
 ## pydisplay + LVGL on Android
 
