@@ -24,7 +24,6 @@ Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/
 From this repo:
 
 ```bash
-cd ~/gh/pydevices/pydisplay_android
 ./build_android.sh
 # APK: android_demo/bin/pydisplaydemo-0.4.0-*-debug.apk (name may vary)
 adb install -r android_demo/bin/*.apk

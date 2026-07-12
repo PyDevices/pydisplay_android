@@ -82,7 +82,7 @@ If the phone shows "unauthorized", unlock it and accept the RSA fingerprint prom
 If adb.exe sees the phone on Windows but WSL adb does not, use adb.exe (this script tries that on WSL).
 
 Build the APK first if needed:
-  cd ~/gh/pydevices/pydisplay_android && ./build_android.sh
+  ./build_android.sh
 EOF
 }
 
@@ -104,7 +104,7 @@ No USB Android phone is connected to adb (or the device is unauthorized).
        ./scripts/phone.sh
 
 Build the APK first if needed:
-  cd ~/gh/pydevices/pydisplay_android && ./build_android.sh
+  ./build_android.sh
 EOF
 }
 
