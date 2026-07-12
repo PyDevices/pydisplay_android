@@ -17,7 +17,7 @@ On Android there is no MicroPython port; pydisplay runs under **CPython** in a *
 
 `display_driver.py` and `lv_utils.py` are fetched from [pydisplay on GitHub](https://github.com/PyDevices/pydisplay) at build time (not vendored; not yet on TestPyPI). Override with `PYDISPLAY_GITHUB_REPO` / `PYDISPLAY_GITHUB_REF`.
 
-## Build demo APK
+## 🚀 Build demo APK
 
 Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/latest/quickstart.html), Ubuntu/WSL build tools (`git`, `zip`, `openjdk-17-jdk`, `autoconf`, …).
 
