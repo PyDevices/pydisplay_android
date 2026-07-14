@@ -2,7 +2,12 @@
 # Build the p4a_app Android APK from this repo.
 #
 # Usage:
-#   ./build_android.sh [buildozer android debug args...]
+#   ./build_android.sh [extra buildozer args after "android debug"...]
+#
+# Cache policy (important):
+#   Never wipes p4a_app/.buildozer or ~/.buildozer between runs. Incremental
+#   rebuilds reuse hostpython, python3, sdl2, and recipe builds. This script
+#   refuses buildozer clean/distclean unless ALLOW_CLEAN=1.
 #
 # Environment:
 #   VENV_DIR            Host build venv (default: $SCRIPT_DIR/.venv)
@@ -11,6 +16,7 @@
 #   ANDROID_NDK_HOME    Android NDK (auto-detected under $ANDROID_HOME/ndk when unset)
 #   JAVA_HOME           JDK for Android tooling (auto-detected from java on PATH when unset)
 #   FETCH_LVGL_ADDONS   Set to 1 to fetch display_driver.py / lv_utils.py (LVGL apps)
+#   ALLOW_CLEAN         Set to 1 to permit clean/distclean args (default: refuse)
 #
 # Runtime deps are installed from TestPyPI via p4a PyProjectRecipe wrappers in p4a_recipes/.
 set -euo pipefail
@@ -26,13 +32,31 @@ PIP="$VENV_DIR/bin/pip"
 BUILDOZER="$VENV_DIR/bin/buildozer"
 
 usage() {
-    sed -n '2,16p' "$0" | sed 's/^# \?//'
+    sed -n '2,22p' "$0" | sed 's/^# \?//'
     exit "${1:-0}"
 }
 
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     usage 0
 fi
+
+refuse_cache_wipe_args() {
+    # Do not forward buildozer targets that wipe p4a build trees.
+    local a
+    for a in "$@"; do
+        case "$a" in
+            clean|distclean|clean_builds|clean_dists|clean_download_cache|clean_all)
+                if [[ "${ALLOW_CLEAN:-0}" != "1" ]]; then
+                    echo "Refusing to run buildozer '$a' (would wipe Android build cache)." >&2
+                    echo "Re-run with ALLOW_CLEAN=1 only if you intentionally want a cold rebuild." >&2
+                    exit 2
+                fi
+                ;;
+        esac
+    done
+}
+
+refuse_cache_wipe_args "$@"
 
 require_dir() {
     local path=$1
@@ -122,8 +146,14 @@ fi
 if [[ -n "${JAVA_HOME:-}" ]]; then
     echo "    JAVA_HOME=$JAVA_HOME"
 fi
+if [[ -d "$APP_DIR/.buildozer" ]]; then
+    echo "    cache=$APP_DIR/.buildozer (reusing; not cleared)"
+else
+    echo "    cache=$APP_DIR/.buildozer (first build — will be created)"
+fi
 
 cd "$APP_DIR"
+# Always "android debug" — never "android clean". Extra args are flags only.
 "$BUILDOZER" android debug "$@"
 
 echo "==> APK output:"

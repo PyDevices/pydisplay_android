@@ -7,14 +7,19 @@ source.include_exts = py
 source.main = main.py
 version = 0.5.0
 # Paint milestone: no LVGL. Native wheels: usdl2, graphics-cmod (via graphics recipe).
+# displaysys wheel includes sdldisplay and other backends (full package from TestPyPI).
 requirements = python3,sdl2,usdl2,displaysys,eventsys,graphics,multimer
 orientation = portrait
 fullscreen = 0
 android.api = 31
 android.minapi = 24
 android.archs = arm64-v8a, armeabi-v7a
+# Prefer p4a.bootstrap (android.bootstrap is deprecated in newer buildozer).
+p4a.bootstrap = sdl2
 android.bootstrap = sdl2
 android.permissions = INTERNET
+# Keep local SDK/NDK; do not re-run sdkmanager updates every build.
+android.skip_update = True
 
 # PyDevices wheels on TestPyPI (unpinned recipes install latest matching wheel).
 p4a.extra_args = --extra-index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/

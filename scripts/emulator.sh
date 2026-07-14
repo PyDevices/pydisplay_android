@@ -46,38 +46,45 @@ print_missing_avd_wsl() {
 
 No Android emulator is connected to adb.
 
-You appear to be on WSL. The Android emulator normally runs on Windows, not inside
-WSL. Set it up like this:
+You appear to be on WSL. Start the AVD on Windows (not via emulator.exe from WSL),
+then use Windows adb.exe from here.
 
-  1. Install Android Studio on Windows (not inside WSL):
+  1. Install Android Studio on Windows:
        https://developer.android.com/studio
 
-  2. Open Android Studio → More Actions → Virtual Device Manager
-     (or Tools → Device Manager).
+  2. System image ABI must match the Windows host CPU:
+       · AMD64/x86_64 Windows → x86_64 image (required on this machine)
+       · Windows on ARM     → arm64-v8a image
+     An arm64 AVD on AMD64 Windows exits immediately ("emulator process … terminated").
 
-  3. Create Device → pick a phone (e.g. Pixel 6) → Next.
+  3. Prefer sdkmanager for the image (large download — ask before running).
+     cmdline-tools are often missing until installed via Studio:
+       Settings → Languages & Frameworks → Android SDK → SDK Tools
+       → check "Android SDK Command-line Tools (latest)" → Apply
+     Then e.g.:
+       SDK="%LOCALAPPDATA%\Android\Sdk"
+       "%SDK%\cmdline-tools\latest\bin\sdkmanager.bat" ^
+         "system-images;android-37.1;google_apis_playstore_ps16k;x86_64"
+     Or download the same package from Device Manager / SDK Manager UI.
 
-  4. Select a system image with API 31 or newer and arm64-v8a support, e.g.:
-       Android 13 (API 33) · arm64-v8a
-     Download the image if needed → Next → Finish.
+  4. Device Manager → Create Device (e.g. Pixel 9) → pick the x86_64 image → Finish.
+     Or edit/create an AVD that points at that image (not arm64).
 
-  5. Click the Play (▶) button next to the AVD to start the emulator on Windows.
-     Wait until the home screen is fully up.
+  5. Click Play (▶) on the AVD in Windows. Wait for the home screen.
 
-  6. From WSL, confirm Windows adb sees the emulator:
+  6. From WSL (Windows adb — e.g. ~/bin/adb.exe symlink):
        adb.exe devices
-     You should see a line like: emulator-5554   device
+     Expect: emulator-5554   device
 
-  7. Re-run this script:
+  7. Re-run:
        ./scripts/emulator.sh
 
-If adb.exe is not found in WSL, add Windows platform-tools to your PATH, e.g.:
+If adb.exe is not on PATH, symlink or:
   export PATH="$PATH:/mnt/c/Users/$USER/AppData/Local/Android/Sdk/platform-tools"
-
-Or set ADB explicitly:
+  # or:
   ADB='/mnt/c/Users/YOUR_USER/AppData/Local/Android/Sdk/platform-tools/adb.exe' ./scripts/emulator.sh
 
-Build the APK first if you have not already:
+Build the APK first if needed:
   ./build_android.sh
 EOF
 }
@@ -96,17 +103,17 @@ Set up an AVD on Linux/macOS like this:
        export ANDROID_HOME="${HOME}/.buildozer/android/platform/android-sdk"
        export PATH="\$ANDROID_HOME/platform-tools:\$ANDROID_HOME/emulator:\$PATH"
 
-  3. Install emulator pieces (adjust API level if needed):
+  3. Install emulator pieces (ABI must match the host; use x86_64 on AMD64):
        sdkmanager "platform-tools" "emulator" \\
-         "platforms;android-31" \\
-         "system-images;android-31;google_apis;arm64-v8a"
+         "platforms;android-34" \\
+         "system-images;android-34;google_apis;x86_64"
 
   4. Create an AVD (pick any unused name):
-       avdmanager create avd -n pydisplay_api31 -k \\
-         "system-images;android-31;google_apis;arm64-v8a" -d pixel_6
+       avdmanager create avd -n pydisplay_api34 -k \\
+         "system-images;android-34;google_apis;x86_64" -d pixel_6
 
   5. Start the emulator:
-       emulator -avd pydisplay_api31 &
+       emulator -avd pydisplay_api34 &
 
   6. Wait for boot, then confirm:
        adb devices
@@ -204,7 +211,8 @@ adb_install_arg() {
 }
 
 list_devices() {
-  adb_cmd devices | awk 'NR>1 && $2=="device" { print $1 }'
+  # adb.exe prints CRLF; strip \r so $2 matches "device"
+  adb_cmd devices | tr -d '\r' | awk 'NR>1 && $2=="device" { print $1 }'
 }
 
 ADB_BIN="$(pick_adb)" || {
