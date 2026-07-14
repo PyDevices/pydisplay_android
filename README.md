@@ -24,12 +24,33 @@ LVGL glue (`display_driver.py`, `lv_utils.py`) can be fetched from [pydisplay on
 Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/latest/quickstart.html), Ubuntu/WSL build tools (`git`, `zip`, `openjdk-17-jdk`, `autoconf`, …). Tooling already downloaded by buildozer lives under `~/.buildozer/android/platform/` by default.
 
 ```bash
-./build_android.sh
+./build_android.sh              # prompts for launcher title (Enter = current)
+./build_android.sh -y           # keep current title (CI / automation)
+./build_android.sh --title Paint
 # APK: p4a_app/bin/p4a_app-0.5.0-*-debug.apk (name may vary)
 ./scripts/emulator.sh
 ```
 
-`build_android.sh` creates `.venv/` and installs host deps from `requirements.txt`. `p4a_app/build_apk.sh` is a thin wrapper. Package id: **`org.pydevices.p4a_app`**.
+`build_android.sh` creates `.venv/` and installs host deps from `requirements.txt`. `p4a_app/build_apk.sh` is a thin wrapper. Package id: **`org.pydevices.p4a_app`**. Launcher label comes from `title` in `p4a_app/buildozer.spec`.
+
+### Icon and presplash
+
+`buildozer.spec` points both at the same asset:
+
+```ini
+icon.filename = %(source.dir)s/icon.png
+presplash.filename = %(source.dir)s/icon.png
+```
+
+| Spec | Details |
+|------|---------|
+| File | `p4a_app/icon.png` (default: copy of [PyDevices logo-512.png](https://github.com/PyDevices/PyDevices.github.io/blob/main/assets/img/logo-512.png)) |
+| Format | PNG, square, RGBA preferred |
+| Size | **512×512** (buildozer resizes into density buckets) |
+| `icon` | Launcher / home-screen icon |
+| `presplash` | Startup splash while Python/SDL bootstrap |
+
+Replace `icon.png` (or change the paths) and rebuild for a new look.
 
 ## App layout
 
@@ -39,6 +60,7 @@ Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/
 | `p4a_app/paint.py` | Touch-paint (default APK behavior) |
 | `p4a_app/board_config.py` | SDL display + `eventsys.Runtime` (from pydisplay sdldisplay idiom) |
 | `p4a_app/lib/path.py` | `sys.path` helper (same idea as pydisplay `lib.path`) |
+| `p4a_app/icon.png` | Launcher icon + presplash (see above) |
 
 `buildozer.spec` paint requirements:
 
@@ -59,10 +81,23 @@ cd pydisplay_android/p4a_app
 
 ```bash
 ./scripts/emulator.sh          # AVD already running (WSL → use Windows AVD + adb.exe)
-./scripts/phone.sh             # USB debugging
+./scripts/phone.sh             # USB-connected phone (skips emulators)
 ```
 
 On WSL, start the AVD from **Windows** (Device Manager ▶), then talk to it with Windows `adb.exe` (e.g. a `~/bin/adb.exe` symlink to `%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe`).
+
+### USB debugging on a Samsung phone (One UI)
+
+USB debugging is hidden until Developer options are unlocked, and Samsung **Auto Blocker** can leave it greyed out (“blocked by auto blocker”).
+
+1. **Settings → About phone → Software information** → tap **Build number** seven times (unlock Developer options).
+2. If USB debugging says blocked by Auto Blocker:
+   - **Settings → Security and privacy → Auto Blocker** → turn the **main switch off** (PIN/fingerprint if asked).
+3. **Settings → Developer options** → enable **USB debugging** → OK.
+4. Plug in a data USB cable; accept **Allow USB debugging?** on the phone.
+5. Confirm from WSL: `adb.exe devices` shows a non-`emulator-*` line as `device`, then run `./scripts/phone.sh`.
+
+You can turn Auto Blocker back on afterward; USB debugging may be blocked again until you disable it.
 
 ### Android SDK Command-line Tools (`sdkmanager`)
 

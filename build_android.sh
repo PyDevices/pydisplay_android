@@ -2,7 +2,16 @@
 # Build the p4a_app Android APK from this repo.
 #
 # Usage:
-#   ./build_android.sh [extra buildozer args after "android debug"...]
+#   ./build_android.sh [options] [extra buildozer args after "android debug"...]
+#
+# Options:
+#   -y, --yes, --no-prompt   Keep the current buildozer.spec title (no prompt)
+#   --title NAME             Set the launcher title (no prompt)
+#   -h, --help               Show this help
+#
+# Interactive builds prompt for the launcher title (buildozer.spec `title`),
+# defaulting to the current value. Non-TTY stdin also keeps the current title
+# (same as -y) unless --title is given.
 #
 # Cache policy (important):
 #   Never wipes p4a_app/.buildozer or ~/.buildozer between runs. Incremental
@@ -25,6 +34,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 VENV_DIR="${VENV_DIR:-$SCRIPT_DIR/.venv}"
 REQUIREMENTS="${REQUIREMENTS:-$SCRIPT_DIR/requirements.txt}"
 APP_DIR="$SCRIPT_DIR/p4a_app"
+SPEC="$APP_DIR/buildozer.spec"
 TESTPYPI_INDEX="${TESTPYPI_INDEX:-https://test.pypi.org/simple/}"
 
 PYTHON="$VENV_DIR/bin/python3"
@@ -32,13 +42,47 @@ PIP="$VENV_DIR/bin/pip"
 BUILDOZER="$VENV_DIR/bin/buildozer"
 
 usage() {
-    sed -n '2,22p' "$0" | sed 's/^# \?//'
+    sed -n '2,30p' "$0" | sed 's/^# \?//'
     exit "${1:-0}"
 }
 
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-    usage 0
-fi
+NO_PROMPT=0
+APP_TITLE=""
+BUILDOZER_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)
+            usage 0
+            ;;
+        -y|--yes|--no-prompt)
+            NO_PROMPT=1
+            shift
+            ;;
+        --title)
+            if [[ $# -lt 2 || -z "${2:-}" ]]; then
+                echo "--title requires a non-empty value" >&2
+                exit 2
+            fi
+            APP_TITLE=$2
+            NO_PROMPT=1
+            shift 2
+            ;;
+        --title=*)
+            APP_TITLE=${1#--title=}
+            if [[ -z "$APP_TITLE" ]]; then
+                echo "--title requires a non-empty value" >&2
+                exit 2
+            fi
+            NO_PROMPT=1
+            shift
+            ;;
+        *)
+            BUILDOZER_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
 
 refuse_cache_wipe_args() {
     # Do not forward buildozer targets that wipe p4a build trees.
@@ -56,7 +100,29 @@ refuse_cache_wipe_args() {
     done
 }
 
-refuse_cache_wipe_args "$@"
+refuse_cache_wipe_args "${BUILDOZER_ARGS[@]}"
+
+read_spec_title() {
+    local line
+    line=$(grep -E '^title[[:space:]]*=' "$SPEC" | head -1) || true
+    if [[ -z "$line" ]]; then
+        echo "Missing title= in $SPEC" >&2
+        exit 1
+    fi
+    echo "${line#*=}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
+
+write_spec_title() {
+    local title=$1
+    local tmp
+    tmp=$(mktemp)
+    awk -v t="$title" '
+        BEGIN { re = "^title[[:space:]]*=" }
+        $0 ~ re { print "title = " t; next }
+        { print }
+    ' "$SPEC" >"$tmp"
+    mv "$tmp" "$SPEC"
+}
 
 require_dir() {
     local path=$1
@@ -128,6 +194,35 @@ require_dir "$APP_DIR" "p4a_app"
 require_dir "$SCRIPT_DIR/p4a_recipes" "p4a_recipes"
 require_file "$APP_DIR/main.py" "p4a_app/main.py"
 require_file "$APP_DIR/paint.py" "p4a_app/paint.py"
+require_file "$SPEC" "p4a_app/buildozer.spec"
+
+resolve_app_title() {
+    local default title input
+    default=$(read_spec_title)
+    if [[ -n "$APP_TITLE" ]]; then
+        title=$APP_TITLE
+    elif [[ "$NO_PROMPT" -eq 1 ]] || [[ ! -t 0 ]]; then
+        title=$default
+        if [[ ! -t 0 && "$NO_PROMPT" -eq 0 && -z "$APP_TITLE" ]]; then
+            echo "==> Non-interactive stdin: keeping app title: $title"
+        fi
+    else
+        read -r -p "App launcher title [$default]: " input || true
+        title=${input:-$default}
+    fi
+    if [[ -z "$title" ]]; then
+        echo "App title must not be empty" >&2
+        exit 1
+    fi
+    if [[ "$title" != "$default" ]]; then
+        write_spec_title "$title"
+        echo "==> Updated $SPEC title -> $title"
+    else
+        echo "==> App title: $title"
+    fi
+}
+
+resolve_app_title
 
 if [[ "${FETCH_LVGL_ADDONS:-0}" == "1" ]]; then
     echo "==> Fetching display_driver.py and lv_utils.py from pydisplay on GitHub"
@@ -154,7 +249,7 @@ fi
 
 cd "$APP_DIR"
 # Always "android debug" — never "android clean". Extra args are flags only.
-"$BUILDOZER" android debug "$@"
+"$BUILDOZER" android debug "${BUILDOZER_ARGS[@]}"
 
 echo "==> APK output:"
 ls -1 "$APP_DIR"/bin/*.apk

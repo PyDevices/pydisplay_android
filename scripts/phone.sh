@@ -190,7 +190,12 @@ find_apk() {
 }
 
 adb_cmd() {
-  "$ADB_BIN" "$@"
+  # Windows adb.exe invoked from WSL often ignores ANDROID_SERIAL; pass -s explicitly.
+  if [[ -n "${ANDROID_SERIAL:-}" ]]; then
+    "$ADB_BIN" -s "$ANDROID_SERIAL" "$@"
+  else
+    "$ADB_BIN" "$@"
+  fi
 }
 
 adb_install_arg() {
@@ -203,7 +208,8 @@ adb_install_arg() {
 }
 
 list_physical_devices() {
-  adb_cmd devices | awk '
+  # adb.exe prints CRLF; strip \r so $2 matches "device"
+  adb_cmd devices | tr -d '\r' | awk '
     NR > 1 && $1 !~ /^emulator-/ {
       if ($2 == "device") print $1
     }
@@ -211,7 +217,7 @@ list_physical_devices() {
 }
 
 list_blocked_devices() {
-  adb_cmd devices | awk '
+  adb_cmd devices | tr -d '\r' | awk '
     NR > 1 && $1 !~ /^emulator-/ && ($2 == "unauthorized" || $2 == "offline") {
       print $1, $2
     }

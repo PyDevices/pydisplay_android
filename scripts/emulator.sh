@@ -198,7 +198,12 @@ find_apk() {
 }
 
 adb_cmd() {
-  "$ADB_BIN" "$@"
+  # Windows adb.exe invoked from WSL often ignores ANDROID_SERIAL; pass -s explicitly.
+  if [[ -n "${ANDROID_SERIAL:-}" ]]; then
+    "$ADB_BIN" -s "$ANDROID_SERIAL" "$@"
+  else
+    "$ADB_BIN" "$@"
+  fi
 }
 
 adb_install_arg() {

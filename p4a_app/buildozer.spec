@@ -1,10 +1,13 @@
 [app]
-title = pydisplay p4a_app
+title = Paint
 package.name = p4a_app
 package.domain = org.pydevices
 source.dir = .
 source.include_exts = py
 source.main = main.py
+# PyDevices logo (from PyDevices.github.io/assets/img/logo-512.png)
+icon.filename = %(source.dir)s/icon.png
+presplash.filename = %(source.dir)s/icon.png
 version = 0.5.0
 # Paint milestone: no LVGL. Native wheels: usdl2, graphics-cmod (via graphics recipe).
 # displaysys wheel includes sdldisplay and other backends (full package from TestPyPI).
