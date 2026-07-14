@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the pydisplay/LVGL Android demo APK from this repo.
+# Build the p4a_app Android APK from this repo.
 #
 # Usage:
 #   ./build_android.sh [buildozer android debug args...]
@@ -10,15 +10,15 @@
 #   ANDROID_HOME        Android SDK (default: ~/.buildozer/android/platform/android-sdk)
 #   ANDROID_NDK_HOME    Android NDK (auto-detected under $ANDROID_HOME/ndk when unset)
 #   JAVA_HOME           JDK for Android tooling (auto-detected from java on PATH when unset)
+#   FETCH_LVGL_ADDONS   Set to 1 to fetch display_driver.py / lv_utils.py (LVGL apps)
 #
-# Runtime deps (usdl2, displaysys, eventsys, graphics, multimer, lvgl-cpython) are installed
-# from TestPyPI via p4a PyProjectRecipe wrappers in p4a_recipes/.
+# Runtime deps are installed from TestPyPI via p4a PyProjectRecipe wrappers in p4a_recipes/.
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 VENV_DIR="${VENV_DIR:-$SCRIPT_DIR/.venv}"
 REQUIREMENTS="${REQUIREMENTS:-$SCRIPT_DIR/requirements.txt}"
-DEMO_DIR="$SCRIPT_DIR/android_demo"
+APP_DIR="$SCRIPT_DIR/p4a_app"
 TESTPYPI_INDEX="${TESTPYPI_INDEX:-https://test.pypi.org/simple/}"
 
 PYTHON="$VENV_DIR/bin/python3"
@@ -79,6 +79,14 @@ setup_android_env() {
             export ANDROID_NDK_HOME="$ndk"
         fi
     fi
+    # buildozer layout often keeps the NDK beside the SDK
+    if [[ -z "${ANDROID_NDK_HOME:-}" ]]; then
+        local ndk
+        ndk=$(find "$BUILDOZER_ANDROID_HOME/platform" -maxdepth 1 -type d -name 'android-ndk-*' 2>/dev/null | sort -V | tail -1)
+        if [[ -n "$ndk" ]]; then
+            export ANDROID_NDK_HOME="$ndk"
+        fi
+    fi
 
     if [[ -z "${JAVA_HOME:-}" ]] && command -v java >/dev/null 2>&1; then
         JAVA_HOME=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
@@ -92,16 +100,17 @@ setup_android_env() {
 ensure_build_venv
 setup_android_env
 
-require_dir "$DEMO_DIR" "android_demo"
+require_dir "$APP_DIR" "p4a_app"
 require_dir "$SCRIPT_DIR/p4a_recipes" "p4a_recipes"
+require_file "$APP_DIR/main.py" "p4a_app/main.py"
+require_file "$APP_DIR/paint.py" "p4a_app/paint.py"
 
-echo "==> Fetching display_driver.py and lv_utils.py from pydisplay on GitHub"
-"$SCRIPT_DIR/scripts/fetch_pydisplay_addons.sh" "$DEMO_DIR"
+if [[ "${FETCH_LVGL_ADDONS:-0}" == "1" ]]; then
+    echo "==> Fetching display_driver.py and lv_utils.py from pydisplay on GitHub"
+    "$SCRIPT_DIR/scripts/fetch_pydisplay_addons.sh" "$APP_DIR"
+fi
 
-echo "==> Writing p4a main.py entry"
-"$SCRIPT_DIR/scripts/install_apk_main.sh" "$DEMO_DIR"
-
-echo "==> Building Android APK in $DEMO_DIR"
+echo "==> Building Android APK in $APP_DIR"
 echo "    venv=$VENV_DIR"
 echo "    TestPyPI=$TESTPYPI_INDEX"
 echo "    ANDROID_HOME=$ANDROID_HOME"
@@ -114,8 +123,8 @@ if [[ -n "${JAVA_HOME:-}" ]]; then
     echo "    JAVA_HOME=$JAVA_HOME"
 fi
 
-cd "$DEMO_DIR"
+cd "$APP_DIR"
 "$BUILDOZER" android debug "$@"
 
 echo "==> APK output:"
-ls -1 "$DEMO_DIR"/bin/*.apk
+ls -1 "$APP_DIR"/bin/*.apk

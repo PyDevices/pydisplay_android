@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
-# Install the pydisplay demo APK on a running Android emulator and launch it.
+# Install the p4a_app APK on a running Android emulator and launch it.
 #
 # Usage:
 #   ./scripts/emulator.sh [APK_PATH]
@@ -9,14 +9,14 @@
 #   ANDROID_HOME          Android SDK (default: ~/.buildozer/android/platform/android-sdk)
 #   PYDISPLAY_ANDROID_DIR Repo root (auto-detected)
 #   ADB                   Override adb executable (auto-detected on WSL vs Linux)
-#   PACKAGE_ID            App id (default: org.pydevices.pydisplaydemo)
+#   PACKAGE_ID            App id (default: org.pydevices.p4a_app)
 #   ACTIVITY              Main activity (default: org.kivy.android.PythonActivity)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DEMO="$ROOT/android_demo"
+APP="$ROOT/p4a_app"
 
-PACKAGE_ID="${PACKAGE_ID:-org.pydevices.pydisplaydemo}"
+PACKAGE_ID="${PACKAGE_ID:-org.pydevices.p4a_app}"
 ACTIVITY="${ACTIVITY:-org.kivy.android.PythonActivity}"
 COMPONENT="${PACKAGE_ID}/${ACTIVITY}"
 
@@ -164,7 +164,7 @@ find_apk() {
 
   local -a candidates=()
   local dir apk
-  for dir in "$DEMO/bin"; do
+  for dir in "$APP/bin"; do
     [[ -d "$dir" ]] || continue
     shopt -s nullglob
     for apk in "$dir"/*.apk; do
