@@ -11,7 +11,7 @@ On Android there is no MicroPython port; pydisplay runs under **CPython** in a *
 | [usdl2](https://test.pypi.org/project/usdl2/) | `usdl2` | Native SDL2 subset (Android wheels: `android_21_*`) |
 | [graphics-cmod](https://test.pypi.org/project/graphics-cmod/) | `graphics` | Native graphics (`graphics` recipe → `graphics-cmod`) |
 | [displaysys](https://test.pypi.org/project/displaysys/) | `displaysys` | Display core + backends (`SDLDisplay`, …) |
-| [eventsys](https://test.pypi.org/project/eventsys/) | `eventsys` | Event broker / input queue |
+| [eventsys](https://test.pypi.org/project/eventsys/) | `eventsys` | Event runtime / input queue |
 | [multimer](https://test.pypi.org/project/multimer/) | `multimer` | Timers (`_sdl2` backend on Android) |
 | [lvgl-cpython](https://test.pypi.org/project/lvgl-cpython/) | `lvgl` | LVGL native extension (optional; not in paint `requirements`) |
 
