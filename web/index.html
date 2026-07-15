@@ -33,9 +33,11 @@
   </header>
 
   <section class="hero wrap">
+    <div class="logo-badge"><img src="https://pydevices.github.io/assets/img/logo.svg" alt="PyDevices logo" width="112" height="112"></div>
     <span class="eyebrow">PyDevices / pydisplay_android</span>
     <h1>Android APK path for pydisplay</h1>
-    <p>The Android APK path for pydisplay — python-for-android recipes, a buildozer demo, and desktop smoke tests.</p>
+    <p>pydisplay_android is the Android packaging path for pydisplay: python-for-android recipes, a buildozer-driven demo APK, and the smoke checks that keep the mobile build from rotting silently. It exists so the same pure-Python display stack can run on a phone or board without inventing a separate UI layer.</p>
+    <p>Expect Android SDK/NDK and buildozer on the critical path; packages typically come from TestPyPI. Use <code>./build_android.sh</code> from a fresh clone when you need a concrete APK, and treat this repo as the mobility companion to the desktop and MCU paths rather than a redesign of pydisplay itself.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/PyDevices/pydisplay_android">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3-.3 6-1.5 6-6.5a5 5 0 0 0-1.4-3.5 4.6 4.6 0 0 0-.1-3.5s-1.1-.3-3.5 1.3a12 12 0 0 0-6 0C6.6 1.7 5.5 2 5.5 2a4.6 4.6 0 0 0-.1 3.5A5 5 0 0 0 4 9c0 5 3 6.2 6 6.5a3.4 3.4 0 0 0-1 2.6V22"/></svg>
