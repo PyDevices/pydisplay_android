@@ -31,7 +31,7 @@ Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/
 ./scripts/emulator.sh
 ```
 
-`build_android.sh` creates `.venv/` and installs host deps from `requirements.txt`. `p4a_app/build_apk.sh` is a thin wrapper. Package id: **`org.pydevices.p4a_app`**. Launcher label comes from `title` in `p4a_app/buildozer.spec`.
+`build_android.sh` creates `.venv/` and installs host deps from `requirements.txt`. Package id: **`org.pydevices.p4a_app`**. Launcher label comes from `title` in `p4a_app/buildozer.spec`.
 
 ### Icon and presplash
 
@@ -73,8 +73,7 @@ python3,sdl2,usdl2,displaysys,eventsys,graphics,multimer
 ## Desktop smoke test (Xvfb)
 
 ```bash
-cd pydisplay_android/p4a_app
-./test_desktop.sh
+./scripts/test_desktop.sh
 ```
 
 ## Emulator / phone
@@ -128,7 +127,23 @@ An arm64 AVD on AMD64 Windows exits immediately (“emulator process for AVD …
 
 ## Your own app
 
-Keep `p4a_app/` as the buildozer project: replace `paint.py` (and point `main.py` at your module), keep or adapt `board_config.py`, and adjust `requirements` / `p4a_recipes/` as needed.
+Almost everything a user customizes for their APK lives under **`p4a_app/`**:
+
+| Customize | Where |
+|-----------|--------|
+| Entry / demo code | `p4a_app/main.py`, `paint.py` (or your module + the `import` in `main.py`) |
+| Display / window | `p4a_app/board_config.py` |
+| Title, package id, orientation, version, permissions, `requirements` | `p4a_app/buildozer.spec` |
+| Icon / presplash | `p4a_app/icon.png` (paths in the spec) |
+
+Leave **`p4a_app/`** alone only when you need packaging or host tooling changes:
+
+| Need | Where |
+|------|--------|
+| New / different TestPyPI wheel install | `p4a_recipes/` (+ list the recipe name in `buildozer.spec` `requirements`) |
+| Build / install / smoke helpers | `build_android.sh`, `scripts/` |
+
+Keep `p4a.local_recipes` pointed at this repo’s `p4a_recipes/` unless you are shipping your own recipe tree.
 
 ## Layout
 
@@ -136,3 +151,5 @@ Keep `p4a_app/` as the buildozer project: replace `paint.py` (and point `main.py
 |------|------|
 | `p4a_app/` | buildozer project + sample entry |
 | `p4a_recipes/` | TestPyPI `PyProjectRecipe` wrappers |
+| `scripts/` | Host helpers (`phone.sh`, `emulator.sh`, `test_desktop.sh`, …) |
+| `build_android.sh` | Build the debug APK |
