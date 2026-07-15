@@ -3,7 +3,7 @@ title = Paint
 package.name = p4a_app
 package.domain = org.pydevices
 source.dir = .
-source.include_exts = py
+source.include_exts = py,xml
 source.main = main.py
 # PyDevices logo (from PyDevices.github.io/assets/img/logo-512.png)
 icon.filename = %(source.dir)s/icon.png
@@ -23,6 +23,13 @@ android.bootstrap = sdl2
 android.permissions = INTERNET
 # Keep local SDK/NDK; do not re-run sdkmanager updates every build.
 android.skip_update = True
+
+# Why LEANBACK_LAUNCHER: Android TV / Fire OS launcher visibility (phone
+# LAUNCHER filter remains from p4a defaults).
+android.manifest.intent_filters = %(source.dir)s/intent_filters_tv.xml
+# Why extra_manifest_xml: leanback + optional touchscreen uses-feature tags
+# (android.features alone forces required=true).
+android.extra_manifest_xml = %(source.dir)s/tv_features.xml
 
 # PyDevices wheels on TestPyPI (unpinned recipes install latest matching wheel).
 p4a.extra_args = --extra-index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/
