@@ -3,3 +3,7 @@ p4a_app/bin/
 .venv/
 __pycache__/
 *.pyc
+
+# Cursor IDE throwaways (do not ignore the whole .cursor/ tree)
+.cursor/debug*
+.cursor/plans/
