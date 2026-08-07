@@ -5,7 +5,7 @@
   <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>pydisplay_android — PyDevices</title>
-  <meta name="description" content="Native Android APK companion for pydisplay — python-for-android recipes, SDL Runtime, and buildozer demo app.">
+  <meta name="description" content="Install your pydisplay apps on a phone — python-for-android recipes, SDL Runtime, and buildozer APK builds.">
   <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,11 +16,15 @@
   <div id="pydevices-site-header"></div>
 
   <section class="hero wrap">
-    <div class="logo-badge product-mark"><img src="img/product.svg" alt="pydisplay_android" width="112" height="112"></div>
-    <span class="eyebrow">PyDevices / pydisplay_android</span>
-    <h1>Native Android APK for the pydisplay stack.</h1>
-    <p>pydisplay_android is the <strong>native APK companion</strong> to pydisplay: python-for-android recipes, a buildozer-driven demo under <code>p4a_app/</code>, and the smoke path that keeps the mobile build honest. On Android there is no MicroPython port — the app runs <strong>CPython</strong> with the SDL2 bootstrap, pulling wheels from TestPyPI.</p>
-    <p>This is not the browser PWA — for in-browser demos see <a href="https://pydevices.github.io/pydisplay/">pydisplay</a>. This repo produces a real APK you install on a phone or emulator.</p>
+    <div class="hero-lead">
+      <div class="hero-brand">
+        <div class="logo-badge product-mark"><img src="img/product.svg" alt="pydisplay_android" width="112" height="112"></div>
+        <span class="eyebrow">PyDevices / pydisplay_android</span>
+      </div>
+      <h1>Native Android APK for the pydisplay stack.</h1>
+    </div>
+    <p>pydisplay_android is how you <strong>install your pydisplay apps on your phone</strong>: python-for-android recipes, a buildozer-driven sample under <code>p4a_app/</code> you can replace with your own app, and the smoke path that keeps the mobile build honest. On Android there is no MicroPython port — the APK runs <strong>CPython</strong> with the SDL2 bootstrap, pulling wheels from TestPyPI.</p>
+    <p>This is not the browser gallery — for in-browser demos see the <a href="https://pydevices.github.io/pydisplay/pyscript/">PyScript Gallery</a>. This repo produces a real APK you install on a phone or emulator.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/PyDevices/pydisplay_android">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3-.3 6-1.5 6-6.5a5 5 0 0 0-1.4-3.5 4.6 4.6 0 0 0-.1-3.5s-1.1-.3-3.5 1.3a12 12 0 0 0-6 0C6.6 1.7 5.5 2 5.5 2a4.6 4.6 0 0 0-.1 3.5A5 5 0 0 0 4 9c0 5 3 6.2 6 6.5a3.4 3.4 0 0 0-1 2.6V22"/></svg>
@@ -31,7 +35,7 @@
 
   <main class="cards wrap">
     <div class="section-head">
-      <h2>Build the demo APK</h2>
+      <h2>Build a sample APK</h2>
       <span class="hint">requires Android SDK/NDK + buildozer</span>
     </div>
     <div class="install-block">
@@ -76,17 +80,17 @@ runtime.run_forever()</code></pre>
     </div>
 
     <div class="section-head" style="margin-top: 36px;">
-      <h2>PWA vs APK</h2>
+      <h2>Gallery vs APK</h2>
       <span class="hint">two different delivery paths — do not conflate</span>
     </div>
     <div class="grid">
       <div class="card">
         <div class="card-top">
           <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-          <span class="tag featured">PWA</span>
+          <span class="tag featured">Gallery</span>
         </div>
-        <h3>Browser / PyScript</h3>
-        <p>Runs in Chrome (or as an installed web app). MicroPython or Pyodide in the browser — no APK, no Android SDK. Ideal for demos and quick tryouts.</p>
+        <h3>PyScript Gallery</h3>
+        <p>Runs in Chrome (or as an installed web app). MicroPython or Pyodide in the browser — no APK, no Android SDK. Ideal for quick tryouts of the same examples.</p>
       </div>
       <div class="card">
         <div class="card-top">
@@ -100,13 +104,13 @@ runtime.run_forever()</code></pre>
 
     <div class="section-head" style="margin-top: 36px;">
       <h2>Customize</h2>
-      <span class="hint">clone and replace the demo app</span>
+      <span class="hint">clone and replace the sample app</span>
     </div>
     <div class="grid">
       <div class="card">
         <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg></span>
         <h3><code>p4a_app/</code></h3>
-        <p>Demo application: <code>board_config.py</code>, <code>paint.py</code>, <code>main.py</code>, and <code>buildozer.spec</code> (package id <code>org.pydevices.p4a_app</code>).</p>
+        <p>Sample application: <code>board_config.py</code>, <code>paint.py</code>, <code>main.py</code>, and <code>buildozer.spec</code> (package id <code>org.pydevices.p4a_app</code>). Swap in your pydisplay app to ship it.</p>
       </div>
       <div class="card">
         <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"/></svg></span>
